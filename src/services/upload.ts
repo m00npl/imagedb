@@ -1,4 +1,4 @@
-import { GolemDBStorage } from '../storage/golem-db';
+import { GolemDBStorage } from '../storage/golem-storage';
 import { ChunkingService } from './chunking';
 import { QuotaService } from './quota';
 import { CONFIG, UploadSession, MediaMetadata } from '../types';
@@ -87,7 +87,18 @@ export class UploadService {
         return { success: false, error: 'Media chunks not found or incomplete' };
       }
 
-      const reassembledBuffer = ChunkingService.reassembleFile(chunks);
+      // Convert MediaChunk to ChunkEntity format for reassembly
+      const chunkEntities = chunks.map(chunk => ({
+        id: '',
+        media_id: chunk.media_id,
+        chunk_index: chunk.chunk_index,
+        data: typeof chunk.data === 'string' ? Buffer.from(chunk.data, 'base64') : Buffer.from(chunk.data),
+        checksum: chunk.checksum,
+        created_at: new Date(),
+        expiration_block: chunk.expiration_block
+      }));
+
+      const reassembledBuffer = ChunkingService.reassembleFile(chunkEntities);
 
       if (!ChunkingService.validateFileIntegrity(metadata.checksum, reassembledBuffer)) {
         return { success: false, error: 'File integrity check failed' };
@@ -109,5 +120,43 @@ export class UploadService {
 
   async getUploadStatus(idempotencyKey: string): Promise<UploadSession | null> {
     return this.uploadSessions.get(idempotencyKey) || null;
+  }
+
+  async getChunkInfo(media_id: string): Promise<{ success: boolean; chunks?: any[]; error?: string }> {
+    try {
+      const metadata = await this.storage.getMetadata(media_id);
+      if (!metadata) {
+        return { success: false, error: 'Media not found or expired' };
+      }
+
+      const chunks = await this.storage.getAllChunks(media_id);
+      if (chunks.length === 0) {
+        return { success: false, error: 'Media chunks not found or incomplete' };
+      }
+
+      const chunkInfo = chunks.map(chunk => ({
+        chunk_index: chunk.chunk_index,
+        size: typeof chunk.data === 'string' ?
+          Buffer.from(chunk.data, 'base64').length :
+          Buffer.from(chunk.data).length,
+        checksum: chunk.checksum,
+        expiration_block: chunk.expiration_block
+      }));
+
+      return {
+        success: true,
+        chunks: {
+          metadata: {
+            total_chunks: metadata.chunk_count,
+            file_size: metadata.file_size,
+            content_type: metadata.content_type,
+            filename: metadata.filename
+          },
+          entities: chunkInfo
+        }
+      };
+    } catch (error) {
+      return { success: false, error: `Failed to get chunk info: ${error}` };
+    }
   }
 }

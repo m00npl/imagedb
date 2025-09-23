@@ -46,9 +46,9 @@ export class ChunkingService {
 
     return {
       media_id,
-      original_filename,
+      filename: original_filename,
       content_type,
-      total_size: fileBuffer.length,
+      file_size: fileBuffer.length,
       chunk_count,
       checksum: this.calculateChecksum(fileBuffer),
       created_at: new Date(),

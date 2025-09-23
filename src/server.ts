@@ -1,3 +1,6 @@
+import { config } from 'dotenv';
+config();
+
 import { Hono } from 'hono';
 import { serveStatic } from 'hono/bun';
 import { UploadService } from './services/upload';
@@ -59,11 +62,17 @@ app.get('/media/:media_id', async (c) => {
 
     const { buffer, metadata } = result;
 
+    if (!metadata) {
+      return c.json({ error: 'Metadata missing from result' }, 500);
+    }
+
+    console.log('📤 Serving media:', media_id, 'size:', buffer?.length, 'bytes');
+
     return new Response(buffer, {
       headers: {
-        'Content-Type': metadata!.content_type,
-        'Content-Length': metadata!.total_size.toString(),
-        'Content-Disposition': `inline; filename="${metadata!.original_filename}"`,
+        'Content-Type': metadata.content_type,
+        'Content-Length': metadata.file_size.toString(),
+        'Content-Disposition': `inline; filename="${metadata.filename}"`,
         'Cache-Control': 'public, max-age=86400'
       }
     });
@@ -108,6 +117,25 @@ app.get('/status/:idempotency_key', async (c) => {
     });
   } catch (error) {
     console.error('Status error:', error);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+app.get('/chunks/:media_id', async (c) => {
+  try {
+    const media_id = c.req.param('media_id');
+    const chunks = await uploadService.getChunkInfo(media_id);
+
+    if (!chunks.success) {
+      return c.json({ error: chunks.error }, 404);
+    }
+
+    return c.json({
+      media_id: media_id,
+      chunks: chunks.chunks
+    });
+  } catch (error) {
+    console.error('Chunks info error:', error);
     return c.json({ error: 'Internal server error' }, 500);
   }
 });

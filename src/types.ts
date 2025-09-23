@@ -8,11 +8,19 @@ export interface ChunkEntity {
   expiration_block: number;
 }
 
+export interface MediaChunk {
+  media_id: string;
+  chunk_index: number;
+  data: string; // Base64 encoded data
+  checksum: string;
+  expiration_block: number;
+}
+
 export interface MediaMetadata {
   media_id: string;
-  original_filename: string;
+  filename: string;
   content_type: string;
-  total_size: number;
+  file_size: number;
   chunk_count: number;
   checksum: string;
   created_at: Date;
