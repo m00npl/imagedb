@@ -1,0 +1,26 @@
+{
+  "name": "imagesdb",
+  "version": "1.0.0",
+  "description": "Image chunking service for Arkiv",
+  "main": "src/server.ts",
+  "scripts": {
+    "dev": "bun run --hot src/server.ts",
+    "build": "bun build src/server.ts --outdir=dist --target=bun",
+    "start": "bun run dist/server.js",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.12.0",
+    "crypto": "^1.0.1",
+    "dotenv": "^17.2.2",
+    "arkiv-sdk": "latest",
+    "hono": "^4.6.3",
+    "sharp": "^0.33.5",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "bun-types": "latest",
+    "canvas": "^3.2.0"
+  }
+}
