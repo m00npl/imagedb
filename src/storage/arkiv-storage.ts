@@ -1,4 +1,4 @@
-import { createArkivROClient, createArkivClient } from 'arkiv-sdk';
+import { createROClient, createClient } from 'arkiv-sdk';
 import { randomBytes } from 'crypto';
 import { MediaMetadata, MediaChunk } from '../types';
 
@@ -25,7 +25,7 @@ export class ArkivStorage {
       console.log('Chain ID:', this.chainId);
 
       // Initialize read-only client (always works)
-      this.roClient = createArkivROClient(this.chainId, this.rpcUrl, this.wsUrl);
+      this.roClient = createROClient(this.chainId, this.rpcUrl, this.wsUrl);
       console.log('✅ Read-only client created successfully');
 
       // Test read connection
@@ -43,7 +43,7 @@ export class ArkivStorage {
             tag: 'privatekey',
             data: Buffer.from(process.env.ARKIV_PRIVATE_KEY.slice(2), 'hex')
           };
-          this.writeClient = await createArkivClient(this.chainId, accountData, this.rpcUrl, this.wsUrl);
+          this.writeClient = await createClient(this.chainId, accountData, this.rpcUrl, this.wsUrl);
           console.log('✅ Write client created successfully');
 
           const ownerAddress = await this.writeClient.getOwnerAddress();

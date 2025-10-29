@@ -1,6 +1,18 @@
 import { config } from 'dotenv';
 config();
 
+import * as Sentry from '@sentry/node';
+
+// Initialize Sentry
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'production',
+    tracesSampleRate: 1.0,
+  });
+  console.log('✅ Sentry initialized');
+}
+
 import { Hono } from 'hono';
 import { serveStatic } from 'hono/bun';
 import { UploadService } from './services/upload';
@@ -46,6 +58,7 @@ app.post('/media', async (c) => {
     });
   } catch (error) {
     console.error('Upload error:', error);
+    Sentry.captureException(error);
     return c.json({ error: 'Internal server error' }, 500);
   }
 });
@@ -78,6 +91,7 @@ app.get('/media/:media_id', async (c) => {
     });
   } catch (error) {
     console.error('Retrieval error:', error);
+    Sentry.captureException(error);
     return c.json({ error: 'Internal server error' }, 500);
   }
 });
@@ -96,6 +110,7 @@ app.get('/quota', async (c) => {
     });
   } catch (error) {
     console.error('Quota error:', error);
+    Sentry.captureException(error);
     return c.json({ error: 'Internal server error' }, 500);
   }
 });
@@ -117,6 +132,7 @@ app.get('/status/:idempotency_key', async (c) => {
     });
   } catch (error) {
     console.error('Status error:', error);
+    Sentry.captureException(error);
     return c.json({ error: 'Internal server error' }, 500);
   }
 });
@@ -136,6 +152,7 @@ app.get('/chunks/:media_id', async (c) => {
     });
   } catch (error) {
     console.error('Chunks info error:', error);
+    Sentry.captureException(error);
     return c.json({ error: 'Internal server error' }, 500);
   }
 });
