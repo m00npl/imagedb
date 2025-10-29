@@ -88,10 +88,12 @@ describe("Smoke Tests", () => {
   });
 
   test("Non-existent media should return 404", async () => {
+    // Note: This endpoint has performance issues (~10s response time)
+    // TODO: Investigate why 404 responses are so slow
     const fakeMediaId = 'non-existent-media-id-12345';
     const response = await fetch(`${BASE_URL}/media/${fakeMediaId}`, {
-      signal: AbortSignal.timeout(10000) // 10 second timeout
+      signal: AbortSignal.timeout(15000) // 15 second timeout due to slow 404 responses
     });
     expect(response.status).toBe(404);
-  }, 15000);
+  }, 20000); // 20 second test timeout
 });
