@@ -49,5 +49,5 @@ export const CONFIG = {
   DEFAULT_BTL_DAYS: 7,
   FREE_TIER_MAX_BYTES: 100 * 1024 * 1024, // 100 MB
   FREE_TIER_MAX_UPLOADS_PER_DAY: 10,
-  BLOCKS_PER_DAY: 2880 // Arkiv block timing
+  BLOCKS_PER_DAY: 43200 // Arkiv block timing (2-second blocks)
 };
