@@ -128,7 +128,7 @@ jobs:
           ssh ubuntu@${{ env.DEPLOYMENT_HOST }} '
             cd /home/ubuntu/projects/imagedb
             docker compose ps
-            docker compose logs --tail=10 imagesdb imagesdb
+            docker compose logs --tail=10 imagedb imagedb
           '
 
       - name: Deploy with zero-downtime strategy
@@ -143,13 +143,13 @@ jobs:
             docker compose pull
 
             # Graceful restart with health checks
-            docker compose up -d --no-deps imagesdb
+            docker compose up -d --no-deps imagedb
             sleep 30
 
             # Verify service health
-            if ! docker exec imagesdb curl -f http://localhost:3000/health; then
+            if ! docker exec imagedb curl -f http://localhost:3000/health; then
               echo "Service health check failed, rolling back"
-              docker compose up -d --no-deps imagesdb
+              docker compose up -d --no-deps imagedb
               exit 1
             fi
 
@@ -169,7 +169,7 @@ jobs:
             docker compose ps
 
             # Test local health endpoint
-            docker exec imagesdb curl -f http://localhost:3000/health || exit 1
+            docker exec imagedb curl -f http://localhost:3000/health || exit 1
 
             echo "Deployment successful!"
           '
