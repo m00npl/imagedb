@@ -128,7 +128,7 @@ jobs:
           ssh ubuntu@${{ env.DEPLOYMENT_HOST }} '
             cd /home/ubuntu/projects/imagedb
             docker compose ps
-            docker compose logs --tail=10 imagesdb imagesdb
+            docker compose logs --tail=10 imagedb
           '
 
       - name: Deploy with zero-downtime strategy
